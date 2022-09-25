@@ -1,7 +1,7 @@
 syntax on
 set incsearch
 set nocompatible            " disable compatibility to old-time vi
-
+set clipboard+=unnamedplus 
 set showmatch               " show matching brackets.
 set ignorecase              " case insensitive matching
 set mouse=v                 " middle-click paste with mouse
@@ -31,9 +31,11 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'morhetz/gruvbox'
 Plug 'sainnhe/everforest'
 Plug 'ryanoasis/vim-devicons'
+Plug 'nvim-lualine/lualine.nvim'
+Plug 'nanozuki/tabby.nvim',
+" If you want to have icons in your statusline choose one of these
+Plug 'kyazdani42/nvim-web-devicons'
 Plug 'preservim/nerdtree'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
 Plug 'mhinz/vim-startify'
 Plug 'danilamihailov/beacon.nvim'
 Plug 'windwp/nvim-autopairs'
@@ -53,6 +55,7 @@ Plug 'akinsho/flutter-tools.nvim'
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'saadparwaiz1/cmp_luasnip'
+Plug 'phaazon/hop.nvim'
 Plug 'L3MON4D3/LuaSnip', {'tag': 'v<CurrentMajor>.*'}
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
 call plug#end()
@@ -97,7 +100,8 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
-"
+" Hop around
+nnoremap <leader>hh :HopPattern<CR>
 " Using Lua functions
 nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files()<cr>
 nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep()<cr>
@@ -207,7 +211,10 @@ require('lspconfig')['rust_analyzer'].setup{
 }
 
 require("nvim-autopairs").setup {}
-
+require'hop'.setup()
+require('lualine').setup{
+options = { theme = 'gruvbox' }
+}
 require("flutter-tools").setup {
     flutter_lookup_cmd = "asdf where flutter"
 }
