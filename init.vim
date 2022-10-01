@@ -20,23 +20,24 @@ set updatetime=300
 set splitright 
 set splitbelow
 set re=0
-let g:netrw_keepdir=0
-let g:netrw_winsize=30
-let g:netrw_list_hide = '\(^\|\s\s\)\zs\.\S\+'
-let g:netrw_localcopydircmd = 'cp -r'
-let g:netrw_liststyle = 3
+
 call plug#begin('~/.config/nvim/plugged')
 Plug 'lukas-reineke/indent-blankline.nvim'
+Plug 'sainnhe/everforest'
+
+Plug 'rafamadriz/friendly-snippets'
 Plug 'neovim/nvim-lspconfig'
+Plug 'simrat39/symbols-outline.nvim'
 Plug 'morhetz/gruvbox'
+Plug 'williamboman/mason.nvim' 
+Plug 'williamboman/mason-lspconfig.nvim'
+Plug 'VonHeikemen/lsp-zero.nvim'
 Plug 'sainnhe/everforest'
 Plug 'ryanoasis/vim-devicons'
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'nanozuki/tabby.nvim',
 " If you want to have icons in your statusline choose one of these
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'preservim/nerdtree'
-Plug 'mhinz/vim-startify'
 Plug 'danilamihailov/beacon.nvim'
 Plug 'windwp/nvim-autopairs'
 Plug 'tpope/vim-commentary'
@@ -44,12 +45,8 @@ Plug 'tpope/vim-surround'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
-Plug 'letientai299/vim-react-snippets', { 'branch': 'es6' }
-Plug 'epilande/vim-react-snippets'
-Plug 'honza/vim-snippets' "optional
 Plug 'vimpostor/vim-lumen'
 Plug 'sonph/onehalf', { 'rtp': 'vim' }
-Plug 'rakr/vim-one'
 Plug 'dart-lang/dart-vim-plugin'
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'hrsh7th/nvim-cmp'
@@ -62,8 +59,8 @@ call plug#end()
 
 
 " set bg=light
-colorscheme gruvbox
-" colorscheme everforest
+" colorscheme gruvbox
+colorscheme everforest
 " colorscheme one
 " Trigger configuration. You need to change this to something other than <tab> if you use one of the following:
 " - https://github.com/Valloric/YouCompleteMe
@@ -80,16 +77,23 @@ nnoremap L gt
 nnoremap K <Cmd>lua vim.lsp.buf.hover()<CR>
  " Jump to definition
 nnoremap gd <Cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
+nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
+nnoremap ge <Cmd>lua require('telescope.builtin').lsp_diagnostics()<CR>
+nnoremap gi <Cmd>lua require('telescope.builtin').lsp_implementations()<CR>
+nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>
+nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>
+nnoremap <C-p> <Cmd>lua require('telescope.builtin').buffers()<CR>
 nnoremap gD <Cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap gi <Cmd>lua vim.lsp.buf.implementation()<CR>
-nnoremap gr <Cmd>lua vim.lsp.buf.references()<CR>
 nnoremap <leader>rn <Cmd>lua vim.lsp.buf.rename()<CR>
-nnoremap <leader>f <Cmd>lua vim.lsp.buf.formatting()<CR>
+nnoremap <leader>fo <Cmd>lua vim.lsp.buf.formatting()<CR>
  " Open code actions using the default lsp UI, if you want to change this please see the plugins above
 nnoremap <leader>ca <Cmd>lua vim.lsp.buf.code_action()<CR>
  " Open code actions for the selected visual range
 xnoremap <leader>ca <Cmd>lua vim.lsp.buf.range_code_action()<CR>
 
+"show outline
+nnoremap <leader>oo :SymbolsOutline<CR>
 
 " use alt+hjkl to move between split/vsplit panels
 tnoremap <C-h> <C-\><C-n><C-w>h
@@ -150,6 +154,7 @@ tnoremap :q! <C-\><C-n>:q!<CR>
 
 lua <<EOF
 vim.opt.termguicolors = true
+--IndentBlankLine configs
 vim.cmd [[highlight IndentBlanklineIndent1 guifg=#E06C75 gui=nocombine]]
 vim.cmd [[highlight IndentBlanklineIndent2 guifg=#E5C07B gui=nocombine]]
 vim.cmd [[highlight IndentBlanklineIndent3 guifg=#98C379 gui=nocombine]]
@@ -181,40 +186,14 @@ vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
--- Use an on_attach function to only map the following keys
--- after the language server attaches to the current buffer
-local on_attach = function(client, bufnr)
-  -- Enable completion triggered by <c-x><c-o>
-  --vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
-
-end
-
-local lsp_flags = {
-  -- This is the default in Nvim 0.7+
-  debounce_text_changes = 150,
-}
-require('lspconfig')['pyright'].setup{
-    on_attach = on_attach,
-    flags = lsp_flags,
-}
-require('lspconfig')['tsserver'].setup{
-    on_attach = on_attach,
-    flags = lsp_flags,
-}
-require('lspconfig')['rust_analyzer'].setup{
-    on_attach = on_attach,
-    flags = lsp_flags,
-    -- Server-specific settings...
-    settings = {
-      ["rust-analyzer"] = {}
-    }
-}
 
 require("nvim-autopairs").setup {}
+require("symbols-outline").setup()
 require'hop'.setup()
 require('lualine').setup{
 options = { theme = 'gruvbox' }
 }
+
 require("flutter-tools").setup {
     flutter_lookup_cmd = "asdf where flutter"
 }
@@ -266,47 +245,104 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
+local ls= require('luasnip')
+
+require("luasnip.loaders.from_vscode").lazy_load()
+require("luasnip.loaders.from_vscode").lazy_load({paths={"./snippets"}})
+ls.filetype_extend("all",{"_"})
+
+--
 
 -- luasnip setup
-local luasnip = require 'luasnip'
-
--- nvim-cmp setup
-local cmp = require 'cmp'
-cmp.setup {
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
+config = function ()
+    require'cmp'.setup {
+    snippet = {
+      expand = function(args)
+ ls.lsp_expand(args.body)
+      end
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-  }),
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  },
+
+    sources = {
+      { name = 'luasnip' },
+      -- more sources
+    },
+  }
+  end
+
+local lsp = require('lsp-zero')
+lsp.preset('recommended')
+lsp.setup()
+local present, telescope = pcall(require, "telescope")
+
+if not present then
+   return
+end
+
+local default = {
+   defaults = {
+      vimgrep_arguments = {
+         "rg",
+         "--color=never",
+         "--no-heading",
+         "--with-filename",
+         "--line-number",
+         "--column",
+         "--smart-case",
+      },
+      prompt_prefix = "   ",
+      selection_caret = "  ",
+      entry_prefix = "  ",
+      initial_mode = "insert",
+      selection_strategy = "reset",
+      sorting_strategy = "ascending",
+      layout_strategy = "horizontal",
+      layout_config = {
+         horizontal = {
+            prompt_position = "top",
+            preview_width = 0.55,
+            results_width = 0.8,
+         },
+         vertical = {
+            mirror = false,
+         },
+         width = 0.87,
+         height = 0.80,
+         preview_cutoff = 120,
+      },
+      file_sorter = require("telescope.sorters").get_fuzzy_file,
+      file_ignore_patterns = { "node_modules" },
+      generic_sorter = require("telescope.sorters").get_generic_fuzzy_sorter,
+      path_display = { "truncate" },
+      winblend = 0,
+      border = {},
+      borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+      color_devicons = true,
+      use_less = true,
+      set_env = { ["COLORTERM"] = "truecolor" }, -- default = nil,
+      file_previewer = require("telescope.previewers").vim_buffer_cat.new,
+      grep_previewer = require("telescope.previewers").vim_buffer_vimgrep.new,
+      qflist_previewer = require("telescope.previewers").vim_buffer_qflist.new,
+      -- Developer configurations: Not meant for general override
+      buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
+   },
 }
+
+local M = {}
+M.setup = function(override_flag)
+   if override_flag then
+      default = require("core.utils").tbl_override_req("telescope", default)
+   end
+
+   telescope.setup(default)
+
+   local extensions = { "themes", "terms" }
+
+   pcall(function()
+      for _, ext in ipairs(extensions) do
+         telescope.load_extension(ext)
+      end
+   end)
+end
+
+return M
+
