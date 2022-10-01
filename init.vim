@@ -23,11 +23,12 @@ set re=0
 
 call plug#begin('~/.config/nvim/plugged')
 Plug 'lukas-reineke/indent-blankline.nvim'
+Plug 'folke/twilight.nvim'
 Plug 'sainnhe/everforest'
-
 Plug 'rafamadriz/friendly-snippets'
 Plug 'neovim/nvim-lspconfig'
 Plug 'simrat39/symbols-outline.nvim'
+Plug 'TaDaa/vimade'
 Plug 'morhetz/gruvbox'
 Plug 'williamboman/mason.nvim' 
 Plug 'williamboman/mason-lspconfig.nvim'
@@ -35,6 +36,7 @@ Plug 'VonHeikemen/lsp-zero.nvim'
 Plug 'sainnhe/everforest'
 Plug 'ryanoasis/vim-devicons'
 Plug 'nvim-lualine/lualine.nvim'
+Plug 'rmagatti/goto-preview'
 " If you want to have icons in your statusline choose one of these
 Plug 'kyazdani42/nvim-web-devicons'
 Plug 'preservim/nerdtree'
@@ -75,17 +77,17 @@ nnoremap H gT
 nnoremap L gt
  " Show hover
 nnoremap K <Cmd>lua vim.lsp.buf.hover()<CR>
+"Dim inactive range
+nnoremap <leader>tt :Twilight<CR>
  " Jump to definition
-nnoremap gd <Cmd>lua vim.lsp.buf.definition()<CR>
-nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
-nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
-nnoremap ge <Cmd>lua require('telescope.builtin').lsp_diagnostics()<CR>
-nnoremap gi <Cmd>lua require('telescope.builtin').lsp_implementations()<CR>
-nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>
-nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>
-nnoremap <C-p> <Cmd>lua require('telescope.builtin').buffers()<CR>
+ nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions(require('telescope.themes').get_dropdown({}))<CR>
+nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references(require('telescope.themes').get_dropdown({}))<CR>
+nnoremap ge <Cmd>lua require('telescope.builtin').diagnostics(require('telescope.themes').get_dropdown({}))<CR>
+nnoremap gi <Cmd>lua require('telescope.builtin').lsp_implementations(require('telescope.themes').get_dropdown({}))<CR>
+nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols(require('telescope.themes').get_dropdown({}))<CR>
+nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols(require('telescope.themes').get_dropdown({}))<CR>
+nnoremap <C-p> <Cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown({}))<CR>
 nnoremap gD <Cmd>lua vim.lsp.buf.declaration()<CR>
-nnoremap <leader>rn <Cmd>lua vim.lsp.buf.rename()<CR>
 nnoremap <leader>fo <Cmd>lua vim.lsp.buf.formatting()<CR>
  " Open code actions using the default lsp UI, if you want to change this please see the plugins above
 nnoremap <leader>ca <Cmd>lua vim.lsp.buf.code_action()<CR>
@@ -94,7 +96,13 @@ xnoremap <leader>ca <Cmd>lua vim.lsp.buf.range_code_action()<CR>
 
 "show outline
 nnoremap <leader>oo :SymbolsOutline<CR>
-
+"go to preview keybindings
+nnoremap gpd <cmd>lua require('goto-preview').goto_preview_definition()<CR>
+nnoremap gpt <cmd>lua require('goto-preview').goto_preview_type_definition()<CR>
+nnoremap gpi <cmd>lua require('goto-preview').goto_preview_implementation()<CR>
+nnoremap gP <cmd>lua require('goto-preview').close_all_win()<CR>
+" Only set if you have telescope installed
+nnoremap gpr <cmd>lua require('goto-preview').goto_preview_references()<CR>
 " use alt+hjkl to move between split/vsplit panels
 tnoremap <C-h> <C-\><C-n><C-w>h
 tnoremap <C-j> <C-\><C-n><C-w>j
@@ -107,18 +115,18 @@ nnoremap <C-l> <C-w>l
 " Hop around
 nnoremap <leader>hh :HopPattern<CR>
 " Using Lua functions
-nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files()<cr>
-nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep()<cr>
-nnoremap <leader>fb <cmd>lua require('telescope.builtin').buffers()<cr>
-nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown({}))<cr>
+nnoremap <leader>fg <cmd>lua require('telescope.builtin').live_grep(require('telescope.themes').get_dropdown({}))<cr>
+nnoremap <leader>fb <cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_dropdown({}))<cr>
+nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags(require('telescope.themes').get_dropdown({}))<cr>
 "
 "NERDTree commands"
 nnoremap <leader>n :NERDTreeToggle<CR>
+nnoremap <leader>m :NERDTreeFind<CR>
 " nnoremap <C-n> :NERDTree<CR>
 " nnoremap <C-t> :NERDTreeToggle<CR>
 " nnoremap <C-f> :NERDTreeFind<CR>
-
-
+" set
 
 
 " Terminal Function
@@ -166,7 +174,6 @@ vim.opt.list = true
 vim.opt.listchars:append("space:⋅")
 vim.opt.listchars:append("eol:↴")
 
-
 require("indent_blankline").setup {
     space_char_blankline = " ",
     char_highlight_list = {
@@ -197,7 +204,6 @@ options = { theme = 'gruvbox' }
 require("flutter-tools").setup {
     flutter_lookup_cmd = "asdf where flutter"
 }
-
  require'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
   ensure_installed = { "c", "lua", "rust" },
@@ -250,7 +256,7 @@ local ls= require('luasnip')
 require("luasnip.loaders.from_vscode").lazy_load()
 require("luasnip.loaders.from_vscode").lazy_load({paths={"./snippets"}})
 ls.filetype_extend("all",{"_"})
-
+require('goto-preview').setup {}
 --
 
 -- luasnip setup
@@ -268,7 +274,6 @@ config = function ()
     },
   }
   end
-
 local lsp = require('lsp-zero')
 lsp.preset('recommended')
 lsp.setup()
@@ -345,4 +350,5 @@ M.setup = function(override_flag)
 end
 
 return M
+
 
