@@ -1,5 +1,4 @@
 syntax on
-set incsearch
 set nocompatible            " disable compatibility to old-time vi
 set clipboard+=unnamedplus 
 set showmatch               " show matching brackets.
@@ -14,30 +13,34 @@ set tabstop=4               " number of columns occupied by a tab character
 set expandtab               " converts tabs to white space
 set shiftwidth=4            " width for autoindents
 set softtabstop=4           " see multiple spaces as tabstops so <BS> does the right thing
-set cmdheight=2
+set cmdheight=1
 set updatetime=300
 set splitright 
 set splitbelow
-set re=0
-
+let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart']
+let g:browser_search_default_engine='google'
+autocmd VimEnter * colorscheme tokyonight
 call plug#begin('~/.config/nvim/plugged')
 "Themes
 Plug 'mcchrish/zenbones.nvim'        "Minimalist theme"
 Plug 'sainnhe/everforest'            "Theme"
 Plug 'morhetz/gruvbox'
-Plug 'sainnhe/everforest'
 Plug 'rktjmp/lush.nvim'              "Theme plugin required by zenbones"
-
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 "Telescope
 Plug 'nvim-telescope/telescope-media-files.nvim' 
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-live-grep-args.nvim'
-Plug 'nvim-telescope/telescope-project.nvim'
 Plug 'nvim-telescope/telescope-file-browser.nvim'
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
+Plug 'kkharji/sqlite.lua' 
+Plug 'nvim-telescope/telescope-frecency.nvim'
+Plug 'nvim-telescope/telescope-ui-select.nvim'
+
 "LSP & Completions
 Plug 'rafamadriz/friendly-snippets'
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
 Plug 'L3MON4D3/LuaSnip', {'tag': 'v<CurrentMajor>.*'}
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'saadparwaiz1/cmp_luasnip'
@@ -45,24 +48,25 @@ Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'VonHeikemen/lsp-zero.nvim'
 Plug 'williamboman/mason.nvim'        "LSP Installer'"
 Plug 'hrsh7th/nvim-cmp'
-Plug 'simrat39/symbols-outline.nvim'
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'dart-lang/dart-vim-plugin'
-Plug 'glepnir/lspsaga.nvim', { 'branch': 'main' }
-"
+
 "Utilities
-Plug 'kyazdani42/nvim-tree.lua'      "File explorer"
-Plug 'phaazon/hop.nvim'
+Plug 'ggandor/leap.nvim'
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'renerocksai/telekasten.nvim'   "Note taking addon"
 Plug 'renerocksai/calendar-vim'      "goes with telekasten"
-Plug 'ahmedkhalf/project.nvim'
+Plug 'voldikss/vim-browser-search'
+Plug 'mhinz/vim-startify'
+Plug 'ellisonleao/glow.nvim'
+"
 "Editing
 Plug 'windwp/nvim-autopairs' "Add new row automatically when new line in brackets"
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
-
+Plug 'kevinhwang91/nvim-ufo'
+Plug 'kevinhwang91/promise-async'
 "Visual addons
 Plug 'lukas-reineke/indent-blankline.nvim' 
 Plug 'folke/twilight.nvim'           "Highlight only active paragraph"
@@ -70,6 +74,7 @@ Plug 'TaDaa/vimade'                   "Highlight active window"
 Plug 'nvim-lua/popup.nvim'            "Required for Telescope media files"
 Plug 'nvim-telescope/telescope-symbols.nvim' "Emoji picker"
 Plug 'ryanoasis/vim-devicons'
+Plug 'kyazdani42/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'danilamihailov/beacon.nvim'   "Add visibility when cursor moves"
 Plug 'vimpostor/vim-lumen'           "Automatically change light and dark theme to follow system"
@@ -81,12 +86,19 @@ call plug#end()
 " set bg=light
 " colorscheme gruvbox
 " colorscheme zenbones
-colorscheme forestbones
+" colorscheme forestbones
 " colorscheme neobones
 " colorscheme nordbones
 " colorscheme github
 " colorscheme everforest
 
+" colorscheme catppuccin
+
+let g:catppuccin_flavour = "latte" " latte, frappe, macchiato, mocha
+
+lua require("catppuccin").setup()
+
+" colorscheme catppuccin
 
 "==============================================================================
 " GENERAL KEY BINDINGS (No plugins )
@@ -107,61 +119,62 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+nnoremap no :nohl<CR>
 
+nnoremap  <leader>gl :BrowserSearch 
+vnoremap  <leader>gl <Plug>SearchVisual
 
 "==============================================================================
 " LSP KEY BINDINGS
 "==============================================================================
 
 " Show hover
-" nnoremap K <Cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap K <Cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <leader>rn <Cmd>lua vim.lsp.buf.rename()<CR>
 nnoremap gD <Cmd>lua vim.lsp.buf.declaration()<CR>
 " Open code actions using the default lsp UI, if you want to change this please see the plugins above
 nnoremap <leader>ca <Cmd>lua vim.lsp.buf.code_action()<CR>
 " Open code actions for the selected visual range
 xnoremap <leader>ca <Cmd>lua vim.lsp.buf.range_code_action()<CR>
 nnoremap <leader>fo <Cmd>lua vim.lsp.buf.formatting()<CR>
+" Diagnostics
+
+nnoremap ]d <Cmd>lua vim.diagnostic.goto_next()<CR>
+nnoremap [d <Cmd>lua vim.diagnostic.goto_prev()<CR>
+
 "==============================================================================
 " TELESCOPE KEY BINDINGS
 "==============================================================================
 "Pickers
-nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_ivy({}))<cr>
-nnoremap <leader>fG <cmd>lua require('telescope.builtin').grep_files(require('telescope.themes').get_ivy({}))<cr>
-nnoremap <leader>fg <cmd>lua require('telescope').extensions.live_grep_args.live_grep_args(require('telescope.themes').get_ivy({}))<cr>
-nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags(require('telescope.themes').get_ivy({}))<cr>
-nnoremap <leader>fs <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_ivy({}))<cr>
-nnoremap <leader>gp <cmd>lua require('telescope').extensions.project.project(require('telescope.themes').get_ivy({}))<cr>
-nnoremap <leader>fb <cmd>lua require('telescope').extensions.file_browser.file_browser(require('telescope.themes').get_ivy({}))<cr>
-
+nnoremap <leader>ff <cmd>lua require('telescope.builtin').find_files()<cr>
+nnoremap <leader>fG <cmd>lua require('telescope.builtin').grep_files()<cr>
+nnoremap <leader>fg <cmd>lua require('telescope').extensions.live_grep_args.live_grep_args()<cr>
+nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
+nnoremap <leader>fs <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
+nnoremap <leader>fb <cmd>lua require('telescope').extensions.file_browser.file_browser()<cr>
+nnoremap <leader><leader> <cmd> lua require('telescope').extensions.frecency.frecency({ workspace = 'CWD' })<CR>
 " LSP pickers
-" nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
-nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references(require('telescope.themes').get_ivy({}))<CR>
+nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
+nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
 nnoremap ge <Cmd>lua require('telescope.builtin').diagnostics({bufnr=0})<CR>
-nnoremap gE <Cmd>lua require('telescope.builtin').diagnostics(require('telescope.themes').get_ivy({}))<CR>
-nnoremap gim <Cmd>lua require('telescope.builtin').lsp_implementations(require('telescope.themes').get_ivy({}))<CR>
-nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols(require('telescope.themes').get_ivy({}))<CR>
-nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols(require('telescope.themes').get_ivy({}))<CR>
-nnoremap <C-p> <Cmd>lua require('telescope.builtin').buffers(require('telescope.themes').get_ivy({}))<CR>
-
-
-"Git Telescope commands
-nnoremap gbr <Cmd>lua require('telescope.builtin').git_branches(require('telescope.themes').get_ivy({}))<CR>
-nnoremap gbc <Cmd>lua require('telescope.builtin').git_bcommits(require('telescope.themes').get_ivy({}))<CR>
-nnoremap gbm <Cmd>lua require('telescope.builtin').git_commits(require('telescope.themes').get_ivy({}))<CR>
-nnoremap gbs <Cmd>lua require('telescope.builtin').git_status(require('telescope.themes').get_ivy({}))<CR>
+nnoremap gE <Cmd>lua require('telescope.builtin').diagnostics()<CR>
+nnoremap gim <Cmd>lua require('telescope.builtin').lsp_implementations()<CR>
+nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>
+nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>
+nnoremap <C-p> <Cmd>lua require('telescope.builtin').buffers()<CR>
 
 "==============================================================================
 " TELEKASTEN KEYBINDINGS
 "==============================================================================
 
 "Telekasten bindings
-nnoremap <leader>zf :lua require('telekasten').find_notes(require('telescope.themes').get_ivy({}))<CR>
-nnoremap <leader>zd :lua require('telekasten').find_daily_notes(require('telescope.themes').get_ivy({}))<CR>
-nnoremap <leader>zg :lua require('telekasten').search_notes(require('telescope.themes').get_ivy({}))<CR>
-nnoremap <leader>zz :lua require('telekasten').follow_link(require('telescope.themes').get_ivy({}))<CR>
+nnoremap <leader>zf <Cmd>lua require('telekasten').find_notes()<CR>
+nnoremap <leader>zd <Cmd>lua require('telekasten').find_daily_notes()<CR>
+nnoremap <leader>zg <Cmd>lua require('telekasten').search_notes()<CR>
+nnoremap <leader>zz <Cmd>lua require('telekasten').follow_link()<CR>
 
 " on hesitation, bring up the panel
-nnoremap <leader>z :lua require('telekasten').panel(require('telescope.themes').get_ivy({}))<CR>
+nnoremap <leader>z <Cmd>lua require('telekasten').panel()<CR>
 
 "==============================================================================
 " MISC PLUGIN KEYBINDINGS
@@ -169,31 +182,17 @@ nnoremap <leader>z :lua require('telekasten').panel(require('telescope.themes').
 
 "Dim inactive range
 nnoremap <leader>tt :Twilight<CR>
-" Hop around
-nnoremap <leader>hh :HopPattern<CR>
-"
-"NVIM Tcommands"
-nnoremap <leader>n :NvimTreeToggle<CR>
-nnoremap <leader>m :NvimTreeFindFile<CR>
-
-"show outline
-nnoremap <leader>oo :SymbolsOutline<CR>
 "==============================================================================
 
 lua <<EOF
 --=============================================================================
 --INITIALIZATIONS
 --=============================================================================
--- disable netrw at the very start of your init.lua (strongly advised)
-vim.g.loaded = 1
-vim.g.loaded_netrwPlugin = 1
 
-require("nvim-tree").setup()
 require("nvim-autopairs").setup {}
-require("symbols-outline").setup()
-require'hop'.setup()
+require('leap').add_default_mappings()
 require('lualine').setup{
-options = { theme = 'gruvbox' }
+options = { theme = 'tokyonight' }
 }
 require("toggleterm").setup{
 -- size=60,
@@ -201,7 +200,31 @@ open_mapping= [[<c-t>]],
 direction='float'
 }
 
+require('glow').setup({
+style="dark",
+  width = 220,
+})
+--=============================================================================
+--UFO
+--=============================================================================
 
+vim.o.foldcolumn = '1' -- '0' is not bad
+vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
+
+-- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
+vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+
+-- Option 3: treesitter as a main provider instead
+-- Only depend on `nvim-treesitter/queries/filetype/folds.scm`,
+-- performance and stability are better than `foldmethod=nvim_treesitter#foldexpr()`
+require('ufo').setup({
+    provider_selector = function(bufnr, filetype, buftype)
+        return {'treesitter', 'indent'}
+    end
+})
 --=============================================================================
 --INDENT BLANKLINE
 --=============================================================================
@@ -424,65 +447,14 @@ for _, lsp in ipairs(servers) do
     capabilities = capabilities,
   }
 end
-local ls= require('luasnip')
-require("luasnip.loaders.from_vscode").lazy_load({paths={"./snippets/flutter-snippets-master"}})
-ls.filetype_extend("all",{"_"})
---
-
---=============================================================================
--- LSPSAGA 
---=============================================================================
-local keymap = vim.keymap.set
-local saga = require('lspsaga')
-
-saga.init_lsp_saga()
-
--- Lsp finder find the symbol definition implement reference
--- if there is no implement it will hide
--- when you use action in finder like open vsplit then you can
--- use <C-t> to jump back
-keymap("n", "gh", "<cmd>Lspsaga lsp_finder<CR>", { silent = true })
-
--- Code action
-keymap({"n","v"}, "<leader>ca", "<cmd>Lspsaga code_action<CR>", { silent = true })
-
--- Rename
-keymap("n", "<leader>rn", "<cmd>Lspsaga rename<CR>", { silent = true })
-
--- Peek Definition
--- you can edit the definition file in this flaotwindow
--- also support open/vsplit/etc operation check definition_action_keys
--- support tagstack C-t jump back
-keymap("n", "gd", "<cmd>Lspsaga peek_definition<CR>", { silent = true })
-
--- Show line diagnostics
-keymap("n", "<leader>cd", "<cmd>Lspsaga show_line_diagnostics<CR>", { silent = true })
-
--- Show cursor diagnostic
-keymap("n", "<leader>cd", "<cmd>Lspsaga show_cursor_diagnostics<CR>", { silent = true })
-
--- Diagnsotic jump can use `<c-o>` to jump back
-keymap("n", "[e", "<cmd>Lspsaga diagnostic_jump_prev<CR>", { silent = true })
-keymap("n", "]e", "<cmd>Lspsaga diagnostic_jump_next<CR>", { silent = true })
-
--- Only jump to error
-keymap("n", "[E", function()
-  require("lspsaga.diagnostic").goto_prev({ severity = vim.diagnostic.severity.ERROR })
-end, { silent = true })
-keymap("n", "]E", function()
-  require("lspsaga.diagnostic").goto_next({ severity = vim.diagnostic.severity.ERROR })
-end, { silent = true })
-
--- Outline
-keymap("n","<leader>ot", "<cmd>LSoutlineToggle<CR>",{ silent = true })
-
--- Hover Doc
-keymap("n", "K", "<cmd>Lspsaga hover_doc<CR>", { silent = true })
-
 --=============================================================================
 -- SNIPPETS & COMPLETIONS 
 --=============================================================================
 -- luasnip setup
+local ls= require('luasnip')
+require("luasnip.loaders.from_vscode").lazy_load({paths={"./snippets/flutter-snippets-master"}})
+ls.filetype_extend("all",{"_"})
+--
 config = function ()
     require'cmp'.setup {
     snippet = {
@@ -508,78 +480,80 @@ local present, telescope = pcall(require, "telescope")
 if not present then
    return
 end
-local default = {
-   
-   }
-   defaults = {
-      vimgrep_arguments = {
-         "rg",
-         "--color=never",
-         "--no-heading",
-         "--with-filename",
-         "--line-number",
-         "--column",
-         "--smart-case",
+local options = {
+  defaults = {
+    vimgrep_arguments = {
+      "rg",
+      "-L",
+      "--color=never",
+      "--no-heading",
+      "--with-filename",
+      "--line-number",
+      "--column",
+      "--smart-case",
+    },
+    prompt_prefix = "   ",
+    selection_caret = "  ",
+    entry_prefix = "  ",
+    initial_mode = "insert",
+    selection_strategy = "reset",
+    sorting_strategy = "ascending",
+    layout_strategy = "horizontal",
+    layout_config = {
+      horizontal = {
+        prompt_position = "top",
+        preview_width = 0.55,
+        results_width = 0.8,
       },
-pickers={
-   diagnostics={
-   bufnr=0
-   },
-      prompt_prefix = "   ",
-      selection_caret = "  ",
-      entry_prefix = "  ",
-      initial_mode = "insert",
-      selection_strategy = "reset",
-      sorting_strategy = "ascending",
-      layout_strategy = "horizontal",
-      layout_config = {
-         horizontal = {
-            prompt_position = "top",
-            preview_width = 0.55,
-            results_width = 0.8,
-         },
-         vertical = {
-            mirror = false,
-         },
-         width = 0.87,
-         height = 0.80,
-         preview_cutoff = 120,
+      vertical = {
+        mirror = false,
       },
-      file_sorter = require("telescope.sorters").get_fuzzy_file,
-      file_ignore_patterns = { "node_modules" },
-      generic_sorter = require("telescope.sorters").get_generic_fuzzy_sorter,
-      path_display = { "truncate" },
-      winblend = 0,
-      border = {},
-      borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
-      color_devicons = true,
-      use_less = true,
-      set_env = { ["COLORTERM"] = "truecolor" }, -- default = nil,
-      file_previewer = require("telescope.previewers").vim_buffer_cat.new,
-      grep_previewer = require("telescope.previewers").vim_buffer_vimgrep.new,
-      qflist_previewer = require("telescope.previewers").vim_buffer_qflist.new,
-      -- Developer configurations: Not meant for general override
-      buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
-   },
+      width = 0.87,
+      height = 0.80,
+      preview_cutoff = 120,
+    },
+    file_sorter = require("telescope.sorters").get_fuzzy_file,
+    file_ignore_patterns = { "node_modules" },
+    generic_sorter = require("telescope.sorters").get_generic_fuzzy_sorter,
+    path_display = { "truncate" },
+    winblend = 0,
+    border = {},
+    borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+    color_devicons = true,
+    set_env = { ["COLORTERM"] = "truecolor" }, -- default = nil,
+    file_previewer = require("telescope.previewers").vim_buffer_cat.new,
+    grep_previewer = require("telescope.previewers").vim_buffer_vimgrep.new,
+    qflist_previewer = require("telescope.previewers").vim_buffer_qflist.new,
+    -- Developer configurations: Not meant for general override
+    buffer_previewer_maker = require("telescope.previewers").buffer_previewer_maker,
+    mappings = {
+      n = { ["q"] = require("telescope.actions").close },
+    },
+  },
+extensions = {
+    fzf = {
+      fuzzy = true,                    -- false will only do exact matching
+      override_generic_sorter = true,  -- override the generic sorter
+      override_file_sorter = true,     -- override the file sorter
+      case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+                                       -- the default case_mode is "smart_case"
+    },
+["ui-select"] = {
+    require("telescope.themes").get_cursor{}
+},},
+  extensions_list = { "themes", "terms" },
 }
-
-local M = {}
-M.setup = function(override_flag)
    if override_flag then
       default = require("core.utils").tbl_override_req("telescope", default)
    end
 
-   telescope.setup(default)
+   telescope.setup(options)
 
-   local extensions = { "themes", "terms","media_files", "live_grep_args", "project", "file_browser" }
+   local extensions = { "themes", "terms","media_files", "live_grep_args", "project", "file_browser","fzf","frecency","ui-select" }
 
    pcall(function()
       for _, ext in ipairs(extensions) do
          telescope.load_extension(ext)
       end
    end)
-end
-
-return M
-
 
