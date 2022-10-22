@@ -19,7 +19,7 @@ set splitright
 set splitbelow
 let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart']
 let g:browser_search_default_engine='google'
-autocmd VimEnter * colorscheme tokyonight
+autocmd VimEnter * colorscheme rose-pine 
 call plug#begin('~/.config/nvim/plugged')
 "Themes
 Plug 'mcchrish/zenbones.nvim'        "Minimalist theme"
@@ -28,6 +28,7 @@ Plug 'morhetz/gruvbox'
 Plug 'rktjmp/lush.nvim'              "Theme plugin required by zenbones"
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
+Plug 'rose-pine/neovim'
 "Telescope
 Plug 'nvim-telescope/telescope-media-files.nvim' 
 Plug 'nvim-lua/plenary.nvim'
@@ -192,7 +193,7 @@ lua <<EOF
 require("nvim-autopairs").setup {}
 require('leap').add_default_mappings()
 require('lualine').setup{
-options = { theme = 'tokyonight' }
+options = { theme = 'rose-pine' }
 }
 require("toggleterm").setup{
 -- size=60,
@@ -263,7 +264,7 @@ require('telekasten').setup({
 
     -- auto-set telekasten filetype: if false, the telekasten filetype will not be used
     --                               and thus the telekasten syntax will not be loaded either
-    auto_set_filetype = true,
+    auto_set_filetype = false,
 
     -- dir names for special notes (absolute path or subdir name)
     dailies      = home .. '/' .. 'daily',
