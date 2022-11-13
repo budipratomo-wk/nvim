@@ -17,9 +17,21 @@ set cmdheight=1
 set updatetime=300
 set splitright 
 set splitbelow
+
+let g:coq_settings = { 'auto_start': 'shut-up' }
 let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart']
-let g:browser_search_default_engine='google'
-autocmd VimEnter * colorscheme rose-pine 
+let g:clipboard = {
+                \   'name': 'WslClipboard',
+                \   'copy': {
+                \      '+': 'clip.exe',
+                \      '*': 'clip.exe',
+                \    },
+                \   'paste': {
+                \      '+': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+                \      '*': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+                \   },
+                \   'cache_enabled': 0,
+                \ }
 call plug#begin('~/.config/nvim/plugged')
 "Themes
 Plug 'mcchrish/zenbones.nvim'        "Minimalist theme"
@@ -29,6 +41,8 @@ Plug 'rktjmp/lush.nvim'              "Theme plugin required by zenbones"
 Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'rose-pine/neovim'
+Plug 'kyazdani42/nvim-web-devicons'
+Plug 'marko-cerovac/material.nvim'
 "Telescope
 Plug 'nvim-telescope/telescope-media-files.nvim' 
 Plug 'nvim-lua/plenary.nvim'
@@ -41,44 +55,35 @@ Plug 'nvim-telescope/telescope-frecency.nvim'
 Plug 'nvim-telescope/telescope-ui-select.nvim'
 
 "LSP & Completions
-Plug 'rafamadriz/friendly-snippets'
-Plug 'L3MON4D3/LuaSnip', {'tag': 'v<CurrentMajor>.*'}
-Plug 'hrsh7th/cmp-nvim-lsp'
-Plug 'saadparwaiz1/cmp_luasnip'
 Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'VonHeikemen/lsp-zero.nvim'
 Plug 'williamboman/mason.nvim'        "LSP Installer'"
-Plug 'hrsh7th/nvim-cmp'
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'dart-lang/dart-vim-plugin'
+Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
+Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
+Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
 
 "Utilities
 Plug 'ggandor/leap.nvim'
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'renerocksai/telekasten.nvim'   "Note taking addon"
 Plug 'renerocksai/calendar-vim'      "goes with telekasten"
-Plug 'voldikss/vim-browser-search'
 Plug 'mhinz/vim-startify'
-Plug 'ellisonleao/glow.nvim'
 "
 "Editing
 Plug 'windwp/nvim-autopairs' "Add new row automatically when new line in brackets"
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
-Plug 'kevinhwang91/nvim-ufo'
-Plug 'kevinhwang91/promise-async'
 "Visual addons
 Plug 'lukas-reineke/indent-blankline.nvim' 
 Plug 'folke/twilight.nvim'           "Highlight only active paragraph"
 Plug 'TaDaa/vimade'                   "Highlight active window"
 Plug 'nvim-lua/popup.nvim'            "Required for Telescope media files"
 Plug 'nvim-telescope/telescope-symbols.nvim' "Emoji picker"
-Plug 'ryanoasis/vim-devicons'
-Plug 'kyazdani42/nvim-web-devicons'
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'danilamihailov/beacon.nvim'   "Add visibility when cursor moves"
-Plug 'vimpostor/vim-lumen'           "Automatically change light and dark theme to follow system"
 call plug#end()
 
 "==============================================================================
@@ -92,12 +97,16 @@ call plug#end()
 " colorscheme nordbones
 " colorscheme github
 " colorscheme everforest
+" colorscheme material
+colorscheme rose-pine
+
+" let g:material_style = 'Oceanic'
 
 " colorscheme catppuccin
 
-let g:catppuccin_flavour = "latte" " latte, frappe, macchiato, mocha
+" let g:catppuccin_flavour = "frappe" " latte, frappe, macchiato, mocha
 
-lua require("catppuccin").setup()
+" lua require("catppuccin").setup()
 
 " colorscheme catppuccin
 
@@ -189,11 +198,14 @@ lua <<EOF
 --=============================================================================
 --INITIALIZATIONS
 --=============================================================================
-
+require('coq')
 require("nvim-autopairs").setup {}
 require('leap').add_default_mappings()
+
 require('lualine').setup{
-options = { theme = 'rose-pine' }
+options={
+theme= "rose-pine",
+}
 }
 require("toggleterm").setup{
 -- size=60,
@@ -201,31 +213,6 @@ open_mapping= [[<c-t>]],
 direction='float'
 }
 
-require('glow').setup({
-style="dark",
-  width = 220,
-})
---=============================================================================
---UFO
---=============================================================================
-
-vim.o.foldcolumn = '1' -- '0' is not bad
-vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
-vim.o.foldlevelstart = 99
-vim.o.foldenable = true
-
--- Using ufo provider need remap `zR` and `zM`. If Neovim is 0.6.1, remap yourself
-vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
-vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
-
--- Option 3: treesitter as a main provider instead
--- Only depend on `nvim-treesitter/queries/filetype/folds.scm`,
--- performance and stability are better than `foldmethod=nvim_treesitter#foldexpr()`
-require('ufo').setup({
-    provider_selector = function(bufnr, filetype, buftype)
-        return {'treesitter', 'indent'}
-    end
-})
 --=============================================================================
 --INDENT BLANKLINE
 --=============================================================================
@@ -436,43 +423,10 @@ require('telekasten').setup({
 --=============================================================================
 -- LSP 
 --=============================================================================
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
-local lspconfig = require('lspconfig')
-
--- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver','dartls' }
-for _, lsp in ipairs(servers) do
-  lspconfig[lsp].setup {
-    -- on_attach = my_custom_on_attach,
-    capabilities = capabilities,
-  }
-end
---=============================================================================
--- SNIPPETS & COMPLETIONS 
---=============================================================================
--- luasnip setup
-local ls= require('luasnip')
-require("luasnip.loaders.from_vscode").lazy_load({paths={"./snippets/flutter-snippets-master"}})
-ls.filetype_extend("all",{"_"})
---
-config = function ()
-    require'cmp'.setup {
-    snippet = {
-      expand = function(args)
- ls.lsp_expand(args.body)
-      end
-    },
-
-    sources = {
-      { name = 'luasnip' },
-      -- more sources
-    },
-  }
-  end
 local lsp = require('lsp-zero')
-lsp.preset('recommended')
+lsp.preset('lsp-only')
 lsp.setup()
+
 --=============================================================================
 -- TELESCOPE
 --=============================================================================
@@ -557,4 +511,3 @@ extensions = {
          telescope.load_extension(ext)
       end
    end)
-
