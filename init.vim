@@ -1,5 +1,6 @@
 syntax on
 set nocompatible            " disable compatibility to old-time vi
+set clipboard+=unnamedplus 
 set showmatch               " show matching brackets.
 set ignorecase              " case insensitive matching
 set hlsearch                " highlight search results
@@ -17,13 +18,31 @@ set updatetime=300
 set splitright 
 set splitbelow
 
+
+" Prerequisites: 
+" - Neovim 0.8 or higher
+"   Package manager: Vim plug. See readme here: https://github.com/junegunn/vim-plug#unix-linux
+" - Better search performance: ripgrep. Install it with brew: brew install ripgrep
+"
+" - (Optional) to use icons, Nerd font. Download what you like here: https://www.nerdfonts.com/
+"
+" Nice to haves: 
+" - lazygit for git client
+"   ranger for file manager, you can also use the following alternatives: 
+"       https://github.com/nvim-tree/nvim-tree.lua
+"       https://github.com/nvim-telescope/telescope-file-browser.nvim
+"       Or you can always use netrw, the builtin file manager
+"       https://vonheikemen.github.io/devlog/tools/using-netrw-vim-builtin-file-explorer/
+
+
+
 " Enable inline code in markdown
 let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart']
 
 "Plugins!
 call plug#begin('~/.config/nvim/plugged')
 "Themes
-Plug 'sainnhe/everforest'            "Theme"
+Plug 'sainnhe/everforest'            
 Plug 'morhetz/gruvbox'
 Plug 'rose-pine/neovim'
 Plug 'projekt0n/github-nvim-theme'
@@ -49,7 +68,7 @@ Plug 'hrsh7th/nvim-cmp'
 " Mason helps in installing new lsp. You can use :LspInstall [language]
 " whenever you have a new language to code in
 Plug 'williamboman/mason-lspconfig.nvim'
-Plug 'williamboman/mason.nvim'        "LSP Installer'"
+Plug 'williamboman/mason.nvim'        
 
 "Better code parsing
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
@@ -57,36 +76,58 @@ Plug 'dart-lang/dart-vim-plugin'
 
 
 "Utilities
+"Floating terminal. Press CTRL-T to toggle terminal number one. You can also
+"open multiple terminal by pressing [number] then CTRL-T (e.g. 2 CTRL-T)
+"You can configure it to not be floating, but closer to VSCode's setup too. 
+"See their readme for details
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
+
+" Start page if you start nvim without arguments. Its session manager is
+" really useful. See https://github.com/mhinz/vim-startify/wiki/Plugin-features-in-detail#easy-session-handling
 Plug 'mhinz/vim-startify'
 "
 "Editing
 "Add new row automatically when new line in brackets"
 Plug 'windwp/nvim-autopairs' 
 
-"Enable easy toggling of comments 
+"Enable easy toggling of comments. press gcc for single line or gc if you
+"blocked it with visual mode 
 Plug 'tpope/vim-commentary'
 
-"Enable easy switching of brackets
+"Enable easy switching of brackets. Read their readme for instructions
 Plug 'tpope/vim-surround'
 
 
 "Visual addons
 " Put lines to highlight indentation
 Plug 'lukas-reineke/indent-blankline.nvim' 
-Plug 'TaDaa/vimade'                   "Highlight active window"
+"higlight active window
+Plug 'TaDaa/vimade'                   
+
+"Required to display filetype icons. You need to install nerdfont-patched font
+"first. See their github 
 Plug 'kyazdani42/nvim-web-devicons'
+
+"Status bar
 Plug 'nvim-lualine/lualine.nvim'
-Plug 'danilamihailov/beacon.nvim'   "Add visibility when cursor moves"
+
+"Add visibility when cursor moves"
+Plug 'danilamihailov/beacon.nvim'   
+
+"Show git blame for active line
+Plug 'f-person/git-blame.nvim'
+
 call plug#end()
 
 "==============================================================================
 " THEMES
 "==============================================================================
+"Uncomment what you'd like or just install new ones
 " set bg=light
 " colorscheme gruvbox
 " colorscheme everforest
-colorscheme github_light
+colorscheme rose-pine
+" colorscheme github_light
 
 "==============================================================================
 " GENERAL KEY BINDINGS (No plugins )
@@ -130,14 +171,32 @@ nnoremap <leader>ca <Cmd>lua vim.lsp.buf.code_action()<CR>
 " Open code actions for the selected visual range
 xnoremap <leader>ca <Cmd>lua vim.lsp.buf.range_code_action()<CR>
 
-" Similar to ddev format.
+" Similar to ddev format. You still need to run ddev format though. 
 nnoremap <leader>fo <Cmd>lua vim.lsp.buf.formatting()<CR>
+
+"Or if you want to run ddev format on save, uncomment this lines. It's async
+"so you need to wait a bit until it's completed otherwise you'll have unsaved
+"changes discarded.
+"
+" autocmd BufEnter,CursorHold,CursorHoldI,FocusGained * checktime
+" autocmd BufWritePost  *.dart call Format() 
+" function! Format()
+"     :AsyncRun pub run dart_dev format 
+"     let view = winsaveview()
+"     silent edit
+"     call winrestview(view)
+"     redraw!
+" endfunction
 
 
 " Diagnostics
 nnoremap ]d <Cmd>lua vim.diagnostic.goto_next()<CR>
 nnoremap [d <Cmd>lua vim.diagnostic.goto_prev()<CR>
+
+"Diagnostics for current buffer
 nnoremap ge <Cmd>lua require('telescope.builtin').diagnostics({bufnr=0})<CR>
+
+"Diagnostics for the whole workspace
 nnoremap gE <Cmd>lua require('telescope.builtin').diagnostics()<CR>
 
 " LSP navigations 
@@ -176,7 +235,7 @@ lua <<EOF
 require("nvim-autopairs").setup {}
 
 require('lualine').setup{
-options = { theme = 'github_light' }
+options = { theme = 'rose-pine' }
 }
 
 require("toggleterm").setup{
@@ -215,10 +274,11 @@ require("indent_blankline").setup {
 --=============================================================================
 -- TREESITTER
 --=============================================================================
+-- I mostly copy pasted this section from the readme of treesitter
 
  require'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
-  ensure_installed = { "c", "lua", "rust" },
+  ensure_installed = { "dart"},
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -247,51 +307,37 @@ require("indent_blankline").setup {
     -- Using this option may slow down your editor, and you may see some duplicate highlights.
     -- Instead of true it can also be a list of languages
     additional_vim_regex_highlighting = false,
-  },
+  }
 }
 --=============================================================================
 -- LSP 
 --=============================================================================
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 local lspconfig = require('lspconfig')
 
 -- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'clangd', 'rust_analyzer', 'pyright', 'tsserver','dartls' }
+local servers = { 'dartls'}
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     -- on_attach = my_custom_on_attach,
     capabilities = capabilities,
   }
 end
-
 --=============================================================================
 -- SNIPPETS & COMPLETIONS 
 --=============================================================================
--- luasnip setup
-local ls= require('luasnip')
-ls.filetype_extend("all",{"_"})
---
-config = function ()
-    require'cmp'.setup {
-    snippet = {
-      expand = function(args)
- ls.lsp_expand(args.body)
-      end
-    },
 
-    sources = {
-      { name = 'luasnip' },
-      -- more sources
-    },
-  }
-  end
 local lsp = require('lsp-zero')
 lsp.preset('recommended')
 lsp.setup()
+
 --=============================================================================
 -- TELESCOPE
 --=============================================================================
+-- Telescope is very customizable, but I'd recommend using my setup first and 
+-- adjust what you're missing out of it later
+
 local present, telescope = pcall(require, "telescope")
 
 if not present then
