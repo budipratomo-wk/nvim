@@ -1,4 +1,5 @@
 syntax on
+set cursorline
 set nocompatible            " disable compatibility to old-time vi
 set clipboard+=unnamedplus 
 set showmatch               " show matching brackets.
