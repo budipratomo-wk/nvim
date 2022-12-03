@@ -18,41 +18,20 @@ set updatetime=300
 set splitright 
 set splitbelow
 
-let g:coq_settings = { 'auto_start': 'shut-up' }
 let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart']
-let g:clipboard = {
-                \   'name': 'WslClipboard',
-                \   'copy': {
-                \      '+': 'clip.exe',
-                \      '*': 'clip.exe',
-                \    },
-                \   'paste': {
-                \      '+': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-                \      '*': 'powershell.exe -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
-                \   },
-                \   'cache_enabled': 0,
-                \ }
+
 call plug#begin('~/.config/nvim/plugged')
 "Themes
-Plug 'mcchrish/zenbones.nvim'        "Minimalist theme"
 Plug 'sainnhe/everforest'            "Theme"
 Plug 'morhetz/gruvbox'
-Plug 'rktjmp/lush.nvim'              "Theme plugin required by zenbones"
-Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
-Plug 'folke/tokyonight.nvim', { 'branch': 'main' }
 Plug 'rose-pine/neovim'
 Plug 'kyazdani42/nvim-web-devicons'
-Plug 'marko-cerovac/material.nvim'
+
 "Telescope
-Plug 'nvim-telescope/telescope-media-files.nvim' 
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-telescope/telescope-live-grep-args.nvim'
-Plug 'nvim-telescope/telescope-file-browser.nvim'
 Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
-Plug 'kkharji/sqlite.lua' 
-Plug 'nvim-telescope/telescope-frecency.nvim'
-Plug 'nvim-telescope/telescope-ui-select.nvim'
 
 "LSP & Completions
 Plug 'williamboman/mason-lspconfig.nvim'
@@ -76,39 +55,23 @@ Plug 'mhinz/vim-startify'
 Plug 'windwp/nvim-autopairs' "Add new row automatically when new line in brackets"
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
+
 "Visual addons
 Plug 'lukas-reineke/indent-blankline.nvim' 
-Plug 'folke/twilight.nvim'           "Highlight only active paragraph"
 Plug 'TaDaa/vimade'                   "Highlight active window"
-Plug 'nvim-lua/popup.nvim'            "Required for Telescope media files"
-Plug 'nvim-telescope/telescope-symbols.nvim' "Emoji picker"
 Plug 'nvim-lualine/lualine.nvim'
 Plug 'danilamihailov/beacon.nvim'   "Add visibility when cursor moves"
+
 call plug#end()
 
 "==============================================================================
 " THEMES
 "==============================================================================
 " set bg=light
-" colorscheme gruvbox
-" colorscheme zenbones
-" colorscheme forestbones
-" colorscheme neobones
-" colorscheme nordbones
-" colorscheme github
+colorscheme gruvbox
 " colorscheme everforest
-" colorscheme material
-colorscheme rose-pine
+" colorscheme rose-pine
 
-" let g:material_style = 'Oceanic'
-
-" colorscheme catppuccin
-
-" let g:catppuccin_flavour = "frappe" " latte, frappe, macchiato, mocha
-
-" lua require("catppuccin").setup()
-
-" colorscheme catppuccin
 
 "==============================================================================
 " GENERAL KEY BINDINGS (No plugins )
@@ -130,9 +93,6 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 nnoremap no :nohl<CR>
-
-nnoremap  <leader>gl :BrowserSearch 
-vnoremap  <leader>gl <Plug>SearchVisual
 
 "==============================================================================
 " LSP KEY BINDINGS
@@ -161,8 +121,8 @@ nnoremap <leader>fG <cmd>lua require('telescope.builtin').grep_files()<cr>
 nnoremap <leader>fg <cmd>lua require('telescope').extensions.live_grep_args.live_grep_args()<cr>
 nnoremap <leader>fh <cmd>lua require('telescope.builtin').help_tags()<cr>
 nnoremap <leader>fs <cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>
-nnoremap <leader>fb <cmd>lua require('telescope').extensions.file_browser.file_browser()<cr>
-nnoremap <leader><leader> <cmd> lua require('telescope').extensions.frecency.frecency({ workspace = 'CWD' })<CR>
+nnoremap <leader>fb <Cmd>lua require('telescope.builtin').buffers()<CR>
+
 " LSP pickers
 nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
 nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
@@ -171,7 +131,6 @@ nnoremap gE <Cmd>lua require('telescope.builtin').diagnostics()<CR>
 nnoremap gim <Cmd>lua require('telescope.builtin').lsp_implementations()<CR>
 nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>
 nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>
-nnoremap <C-p> <Cmd>lua require('telescope.builtin').buffers()<CR>
 
 "==============================================================================
 " TELEKASTEN KEYBINDINGS
@@ -187,12 +146,18 @@ nnoremap <leader>zz <Cmd>lua require('telekasten').follow_link()<CR>
 nnoremap <leader>z <Cmd>lua require('telekasten').panel()<CR>
 
 "==============================================================================
-" MISC PLUGIN KEYBINDINGS
+" 🐓 Coq completion settings
 "==============================================================================
+"
+let g:coq_settings = { "keymap.recommended": v:false, 'auto_start': 'shut-up','keymap.jump_to_mark':v:null }
 
-"Dim inactive range
-nnoremap <leader>tt :Twilight<CR>
-"==============================================================================
+" Keybindings
+ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
+ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
+ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
+ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
+ino <silent><expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+ino <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<BS>"
 
 lua <<EOF
 --=============================================================================
@@ -204,7 +169,7 @@ require('leap').add_default_mappings()
 
 require('lualine').setup{
 options={
-theme= "rose-pine",
+theme= "gruvbox",
 }
 }
 require("toggleterm").setup{
@@ -423,6 +388,16 @@ require('telekasten').setup({
 --=============================================================================
 -- LSP 
 --=============================================================================
+local lspconfig = require('lspconfig')
+
+
+-- Enable some language servers with the additional completion capabilities offered by nvim-cmp
+local servers = { 'dartls' }
+for _, lsp in ipairs(servers) do
+  lspconfig[lsp].setup {
+    -- on_attach = my_custom_on_attach,
+  }
+end
 local lsp = require('lsp-zero')
 lsp.preset('lsp-only')
 lsp.setup()
