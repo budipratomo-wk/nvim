@@ -43,6 +43,10 @@ Plug 'dart-lang/dart-vim-plugin'
 Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
 Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
+Plug 'akinsho/flutter-tools.nvim'
+Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
+Plug 'ray-x/navigator.lua'
+Plug 'lukas-reineke/lsp-format.nvim'
 
 "Utilities
 Plug 'ggandor/leap.nvim'
@@ -50,6 +54,10 @@ Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'renerocksai/telekasten.nvim'   "Note taking addon"
 Plug 'renerocksai/calendar-vim'      "goes with telekasten"
 Plug 'mhinz/vim-startify'
+Plug 'lewis6991/gitsigns.nvim'
+" Plug 'crispgm/nvim-tabline'
+Plug 'nanozuki/tabby.nvim'
+
 "
 "Editing
 Plug 'windwp/nvim-autopairs' "Add new row automatically when new line in brackets"
@@ -68,8 +76,8 @@ call plug#end()
 " THEMES
 "==============================================================================
 " set bg=light
-colorscheme gruvbox
-" colorscheme everforest
+" colorscheme gruvbox
+colorscheme everforest
 " colorscheme rose-pine
 
 
@@ -125,7 +133,7 @@ nnoremap <leader>fb <Cmd>lua require('telescope.builtin').buffers()<CR>
 
 " LSP pickers
 nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
-nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
+" nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
 nnoremap ge <Cmd>lua require('telescope.builtin').diagnostics({bufnr=0})<CR>
 nnoremap gE <Cmd>lua require('telescope.builtin').diagnostics()<CR>
 nnoremap gim <Cmd>lua require('telescope.builtin').lsp_implementations()<CR>
@@ -163,13 +171,19 @@ lua <<EOF
 --=============================================================================
 --INITIALIZATIONS
 --=============================================================================
+require('tabby.tabline').use_preset('active_wins_at_tail')
+require('gitsigns').setup{
+current_line_blame=true
+}
+--require('tabline').setup({})
 require('coq')
 require("nvim-autopairs").setup {}
 require('leap').add_default_mappings()
 
+
 require('lualine').setup{
 options={
-theme= "gruvbox",
+theme= "everforest",
 }
 }
 require("toggleterm").setup{
@@ -178,6 +192,29 @@ open_mapping= [[<c-t>]],
 direction='float'
 }
 
+--=============================================================================
+-- FLUTTER TOOLS
+--=============================================================================
+
+require('flutter-tools').setup{
+outline = {
+    auto_open=true
+    },
+widget_guides = {
+    enabled = true,
+  },
+
+lsp = {
+    color = { -- show the derived colours for dart variables
+      enabled = true, -- whether or not to highlight color variables at all, only supported on flutter >= 2.10
+      background = false, -- highlight the background
+      foreground = false, -- highlight the foreground
+      virtual_text = true, -- show the highlight using virtual text
+      virtual_text_str = "■", -- the virtual text character to highlight
+    },
+}
+    
+}
 --=============================================================================
 --INDENT BLANKLINE
 --=============================================================================
@@ -388,16 +425,6 @@ require('telekasten').setup({
 --=============================================================================
 -- LSP 
 --=============================================================================
-local lspconfig = require('lspconfig')
-
-
--- Enable some language servers with the additional completion capabilities offered by nvim-cmp
-local servers = { 'dartls' }
-for _, lsp in ipairs(servers) do
-  lspconfig[lsp].setup {
-    -- on_attach = my_custom_on_attach,
-  }
-end
 local lsp = require('lsp-zero')
 lsp.preset('lsp-only')
 lsp.setup()
@@ -439,7 +466,7 @@ local options = {
         mirror = false,
       },
       width = 0.87,
-      height = 0.80,
+      height = 0.90,
       preview_cutoff = 120,
     },
     file_sorter = require("telescope.sorters").get_fuzzy_file,
