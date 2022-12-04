@@ -47,7 +47,7 @@ Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
-Plug 'lukas-reineke/lsp-format.nvim'
+Plug 'j-hui/fidget.nvim'
 
 "Utilities
 Plug 'ggandor/leap.nvim'
@@ -56,8 +56,8 @@ Plug 'renerocksai/telekasten.nvim'   "Note taking addon"
 Plug 'renerocksai/calendar-vim'      "goes with telekasten"
 Plug 'mhinz/vim-startify'
 Plug 'lewis6991/gitsigns.nvim'
-" Plug 'crispgm/nvim-tabline'
-Plug 'nanozuki/tabby.nvim'
+Plug 'crispgm/nvim-tabline'
+Plug 'pwntester/octo.nvim'
 
 "
 "Editing
@@ -77,8 +77,8 @@ call plug#end()
 " THEMES
 "==============================================================================
 " set bg=light
-" colorscheme gruvbox
-colorscheme everforest
+colorscheme gruvbox
+" colorscheme everforest
 " colorscheme rose-pine
 
 
@@ -172,7 +172,8 @@ lua <<EOF
 --=============================================================================
 --INITIALIZATIONS
 --=============================================================================
-require('tabby.tabline').use_preset('active_wins_at_tail')
+require('fidget').setup{}
+require('octo').setup{}
 require('gitsigns').setup{
 current_line_blame=true
 }
@@ -181,10 +182,10 @@ require('coq')
 require("nvim-autopairs").setup {}
 require('leap').add_default_mappings()
 
-
+require('tabline').setup({})
 require('lualine').setup{
 options={
-theme= "everforest",
+theme= "gruvbox",
 }
 }
 require("toggleterm").setup{
@@ -507,7 +508,7 @@ extensions = {
 
    telescope.setup(options)
 
-   local extensions = { "themes", "terms","media_files", "live_grep_args", "project", "file_browser","fzf","frecency","ui-select" }
+   local extensions = { "themes", "terms", "fzf"}
 
    pcall(function()
       for _, ext in ipairs(extensions) do
