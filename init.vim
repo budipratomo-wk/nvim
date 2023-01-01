@@ -1,4 +1,5 @@
 syntax on
+set so=999
 set cursorline
 set nocompatible            " disable compatibility to old-time vi
 set clipboard+=unnamedplus 
@@ -27,7 +28,8 @@ Plug 'sainnhe/everforest'            "Theme"
 Plug 'morhetz/gruvbox'
 Plug 'rose-pine/neovim'
 Plug 'kyazdani42/nvim-web-devicons'
-
+Plug 'savq/melange'
+Plug 'eddyekofo94/gruvbox-flat.nvim'
 "Telescope
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
@@ -41,13 +43,24 @@ Plug 'williamboman/mason.nvim'        "LSP Installer'"
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'dart-lang/dart-vim-plugin'
-Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
-Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
-Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
 Plug 'akinsho/flutter-tools.nvim'
 Plug 'ray-x/guihua.lua', {'do': 'cd lua/fzy && make' }
 Plug 'ray-x/navigator.lua'
 Plug 'j-hui/fidget.nvim'
+
+" Autocompletion
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'saadparwaiz1/cmp_luasnip'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-nvim-lua'
+
+"  Snippets
+Plug 'L3MON4D3/LuaSnip'
+Plug 'rafamadriz/friendly-snippets'
+
+Plug 'VonHeikemen/lsp-zero.nvim'
 
 "Utilities
 Plug 'ggandor/leap.nvim'
@@ -58,7 +71,13 @@ Plug 'mhinz/vim-startify'
 Plug 'lewis6991/gitsigns.nvim'
 Plug 'crispgm/nvim-tabline'
 Plug 'pwntester/octo.nvim'
-
+Plug 'ellisonleao/glow.nvim'
+Plug 'neovim/nvim-lspconfig'
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'hrsh7th/nvim-cmp'
 "
 "Editing
 Plug 'windwp/nvim-autopairs' "Add new row automatically when new line in brackets"
@@ -77,9 +96,11 @@ call plug#end()
 " THEMES
 "==============================================================================
 " set bg=light
+" colorscheme melange
 colorscheme gruvbox
 " colorscheme everforest
 " colorscheme rose-pine
+" colorscheme gruvbox-flat
 
 
 "==============================================================================
@@ -134,51 +155,26 @@ nnoremap <leader>fb <Cmd>lua require('telescope.builtin').buffers()<CR>
 
 " LSP pickers
 nnoremap gd <Cmd>lua require('telescope.builtin').lsp_definitions()<CR>
-" nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
+nnoremap gr <Cmd>lua require('telescope.builtin').lsp_references()<CR>
 nnoremap ge <Cmd>lua require('telescope.builtin').diagnostics({bufnr=0})<CR>
 nnoremap gE <Cmd>lua require('telescope.builtin').diagnostics()<CR>
 nnoremap gim <Cmd>lua require('telescope.builtin').lsp_implementations()<CR>
 nnoremap go <Cmd>lua require('telescope.builtin').lsp_document_symbols()<CR>
 nnoremap gO <Cmd>lua require('telescope.builtin').lsp_workspace_symbols()<CR>
 
-"==============================================================================
-" TELEKASTEN KEYBINDINGS
-"==============================================================================
-
-"Telekasten bindings
-nnoremap <leader>zf <Cmd>lua require('telekasten').find_notes()<CR>
-nnoremap <leader>zd <Cmd>lua require('telekasten').find_daily_notes()<CR>
-nnoremap <leader>zg <Cmd>lua require('telekasten').search_notes()<CR>
-nnoremap <leader>zz <Cmd>lua require('telekasten').follow_link()<CR>
-
-" on hesitation, bring up the panel
-nnoremap <leader>z <Cmd>lua require('telekasten').panel()<CR>
-
-"==============================================================================
-" 🐓 Coq completion settings
-"==============================================================================
-"
-let g:coq_settings = { "keymap.recommended": v:false, 'auto_start': 'shut-up','keymap.jump_to_mark':v:null }
-
-" Keybindings
-ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
-ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
-ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
-ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
-ino <silent><expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
-ino <silent><expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<BS>"
 
 lua <<EOF
 --=============================================================================
 --INITIALIZATIONS
 --=============================================================================
+require('glow').setup({
+})
 require('fidget').setup{}
 require('octo').setup{}
 require('gitsigns').setup{
 current_line_blame=true
 }
 --require('tabline').setup({})
-require('coq')
 require("nvim-autopairs").setup {}
 require('leap').add_default_mappings()
 
@@ -244,150 +240,6 @@ require("indent_blankline").setup {
     },
 }
 --=============================================================================
--- TELEKASTEN
---=============================================================================
-local home = vim.fn.expand("~/zettelkasten")
-require('telekasten').setup({
-    home         = home,
-
-    -- if true, telekasten will be enabled when opening a note within the configured home
-    take_over_my_home = true,
-
-    -- auto-set telekasten filetype: if false, the telekasten filetype will not be used
-    --                               and thus the telekasten syntax will not be loaded either
-    auto_set_filetype = false,
-
-    -- dir names for special notes (absolute path or subdir name)
-    dailies      = home .. '/' .. 'daily',
-    weeklies     = home .. '/' .. 'weekly',
-    templates    = home .. '/' .. 'templates',
-
-    -- image (sub)dir for pasting
-    -- dir name (absolute path or subdir name)
-    -- or nil if pasted images shouldn't go into a special subdir
-    image_subdir = "img",
-
-    -- markdown file extension
-    extension    = ".md",
-
-    -- Generate note filenames. One of:
-    -- "title" (default) - Use title if supplied, uuid otherwise
-    -- "uuid" - Use uuid
-    -- "uuid-title" - Prefix title by uuid
-    -- "title-uuid" - Suffix title with uuid
-    new_note_filename = "title",
-    -- file uuid type ("rand" or input for os.date()")
-    uuid_type = "%Y%m%d%H%M",
-    -- UUID separator
-    uuid_sep = "-",
-
-    -- following a link to a non-existing note will create it
-    follow_creates_nonexisting = true,
-    dailies_create_nonexisting = true,
-    weeklies_create_nonexisting = true,
-
-    -- skip telescope prompt for goto_today and goto_thisweek
-    journal_auto_open = false,
-
-    -- template for new notes (new_note, follow_link)
-    -- set to `nil` or do not specify if you do not want a template
-    template_new_note = home .. '/' .. 'templates/new_note.md',
-
-    -- template for newly created daily notes (goto_today)
-    -- set to `nil` or do not specify if you do not want a template
-    template_new_daily = home .. '/' .. 'templates/daily.md',
-
-    -- template for newly created weekly notes (goto_thisweek)
-    -- set to `nil` or do not specify if you do not want a template
-    template_new_weekly= home .. '/' .. 'templates/weekly.md',
-
-    -- image link style
-    -- wiki:     ![[image name]]
-    -- markdown: ![](image_subdir/xxxxx.png)
-    image_link_style = "markdown",
-
-    -- default sort option: 'filename', 'modified'
-    sort = "filename",
-
-    -- integrate with calendar-vim
-    plug_into_calendar = true,
-    calendar_opts = {
-        -- calendar week display mode: 1 .. 'WK01', 2 .. 'WK 1', 3 .. 'KW01', 4 .. 'KW 1', 5 .. '1'
-        weeknm = 4,
-        -- use monday as first day of week: 1 .. true, 0 .. false
-        calendar_monday = 1,
-        -- calendar mark: where to put mark for marked days: 'left', 'right', 'left-fit'
-        calendar_mark = 'left-fit',
-    },
-
-    -- telescope actions behavior
-    close_after_yanking = false,
-    insert_after_inserting = true,
-
-    -- tag notation: '#tag', ':tag:', 'yaml-bare'
-    tag_notation = "#tag",
-
-    -- command palette theme: dropdown (window) or ivy (bottom panel)
-    command_palette_theme = "ivy",
-
-    -- tag list theme:
-    -- get_cursor: small tag list at cursor; ivy and dropdown like above
-    show_tags_theme = "ivy",
-
-    -- when linking to a note in subdir/, create a [[subdir/title]] link
-    -- instead of a [[title only]] link
-    subdirs_in_links = true,
-
-    -- template_handling
-    -- What to do when creating a new note via `new_note()` or `follow_link()`
-    -- to a non-existing note
-    -- - prefer_new_note: use `new_note` template
-    -- - smart: if day or week is detected in title, use daily / weekly templates (default)
-    -- - always_ask: always ask before creating a note
-    template_handling = "smart",
-
-    -- path handling:
-    --   this applies to:
-    --     - new_note()
-    --     - new_templated_note()
-    --     - follow_link() to non-existing note
-    --
-    --   it does NOT apply to:
-    --     - goto_today()
-    --     - goto_thisweek()
-    --
-    --   Valid options:
-    --     - smart: put daily-looking notes in daily, weekly-looking ones in weekly,
-    --              all other ones in home, except for notes/with/subdirs/in/title.
-    --              (default)
-    --
-    --     - prefer_home: put all notes in home except for goto_today(), goto_thisweek()
-    --                    except for notes with subdirs/in/title.
-    --
-    --     - same_as_current: put all new notes in the dir of the current note if
-    --                        present or else in home
-    --                        except for notes/with/subdirs/in/title.
-    new_note_location = "smart",
-
-    -- should all links be updated when a file is renamed
-    rename_update_links = true,
-
-    vaults = {
-        vault2 = {
-            -- alternate configuration for vault2 here. Missing values are defaulted to
-            -- default values from telekasten.
-            -- e.g.
-            -- home = "/home/user/vaults/personal",
-        },
-    },
-
-    -- how to preview media files
-    -- "telescope-media-files" if you have telescope-media-files.nvim installed
-    -- "catimg-previewer" if you have catimg installed
-    media_previewer = "telescope-media-files",
-})
-
---=============================================================================
 -- TREESITTER
 --=============================================================================
 
@@ -428,7 +280,7 @@ require('telekasten').setup({
 -- LSP 
 --=============================================================================
 local lsp = require('lsp-zero')
-lsp.preset('lsp-only')
+lsp.preset('recommended')
 lsp.setup()
 
 --=============================================================================
