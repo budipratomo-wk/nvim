@@ -19,7 +19,7 @@ set splitright
 set splitbelow
 set termguicolors
 
-let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart']
+let g:markdown_fenced_languages = ['html', 'python', 'ruby', 'vim','dart','go']
 
 call plug#begin('~/.config/nvim/plugged')
 "Themes
@@ -27,7 +27,13 @@ Plug 'sainnhe/everforest'            "Theme"
 Plug 'morhetz/gruvbox'
 Plug 'rose-pine/neovim'
 Plug 'kyazdani42/nvim-web-devicons'
-
+Plug 'Mofiqul/adwaita.nvim'
+Plug 'rebelot/kanagawa.nvim'
+Plug 'tanvirtin/monokai.nvim'
+Plug 'raphamorim/lucario'
+Plug 'fenetikm/falcon'
+Plug 'joshdick/onedark.vim'
+Plug 'arcticicestudio/nord-vim'
 "Telescope
 Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
@@ -40,7 +46,6 @@ Plug 'williamboman/mason.nvim'        "LSP Installer'"
 Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'VonHeikemen/lsp-zero.nvim'
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
-
 " Autocompletion
 Plug 'hrsh7th/nvim-cmp'
 Plug 'hrsh7th/cmp-buffer'
@@ -57,6 +62,12 @@ Plug 'ggandor/leap.nvim'
 Plug 'akinsho/toggleterm.nvim', {'tag' : '*'}
 Plug 'mhinz/vim-startify'
 Plug 'crispgm/nvim-tabline'
+Plug 'nvim-tree/nvim-tree.lua'
+"Debugging
+Plug 'mfussenegger/nvim-dap'
+Plug 'leoluz/nvim-dap-go'
+Plug 'rcarriga/nvim-dap-ui'
+Plug 'folke/neodev.nvim'
 "
 "Editing
 Plug 'windwp/nvim-autopairs' "Add new row automatically when new line in brackets"
@@ -64,9 +75,12 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
 
 "Visual addons
-Plug 'sunjon/shade.nvim'
-" Plug 'TaDaa/vimade'                   "Highlight active window"
+" Plug 'sunjon/shade.nvim'
 Plug 'nvim-lualine/lualine.nvim'
+Plug 'Pocco81/true-zen.nvim'
+
+
+
 
 call plug#end()
 
@@ -74,11 +88,20 @@ call plug#end()
 " THEMES
 "==============================================================================
 " set bg=light
-colorscheme gruvbox
-" colorscheme everforest
+" colorscheme gruvbox
+" colorscheme monokai_pro
+" colorscheme lucario
+" colorscheme falcon
+" colorscheme nord
+" let g:everforest_background = 'soft'
+" colorsche kanagawa
+colorscheme everforest
+
 " colorscheme rose-pine
-
-
+"
+" let g:adwaita_darker = v:true " for darker version
+" let g:adwaita_disable_cursorline = v:true " to disable cursorline
+" colorscheme adwaita
 "==============================================================================
 " GENERAL KEY BINDINGS (No plugins )
 "==============================================================================
@@ -111,7 +134,7 @@ nnoremap <leader>rn <Cmd>lua vim.lsp.buf.rename()<CR>
 nnoremap <leader>ca <Cmd>lua vim.lsp.buf.code_action()<CR>
 " Open code actions for the selected visual range
 xnoremap <leader>ca <Cmd>lua vim.lsp.buf.range_code_action()<CR>
-nnoremap <leader>o <Cmd>lua vim.lsp.buf.format({async = true})<CR>
+nnoremap <leader>lf <Cmd>lua vim.lsp.buf.format({async = true})<CR>
 " Diagnostics
 
 nnoremap ]d <Cmd>lua vim.diagnostic.goto_next()<CR>
@@ -141,16 +164,51 @@ nnoremap <leader>s <cmd>lua require('telescope.builtin').current_buffer_fuzzy_fi
 nnoremap <leader>b <Cmd>lua require('telescope.builtin').buffers()<CR>
 nnoremap <leader>y <Cmd>lua require('telescope.builtin').search_history()<CR>
 nnoremap <leader>m <Cmd>lua require('telescope.builtin').resume()<CR>
+
+"==============================================================================
+" NVIM TREE
+"==============================================================================
+nnoremap <leader>xb  :NvimTreeFindFile<CR>
+nnoremap <leader>xx  :NvimTreeToggle<CR>
+
+"==============================================================================
+" DEBUGGING
+"==============================================================================
+
+nnoremap <leader>db  <cmd>lua require('dap').toggle_breakpoint()<CR>
+nnoremap <leader>dc  <cmd>lua require('dap').continue()<CR>
+nnoremap <leader>do  <cmd>lua require('dap').step_over()<CR>
+nnoremap <leader>di  <cmd>lua require('dap').step_into()<CR>
+nnoremap <leader>de  <cmd>lua require('dap').repl.open()<CR>
+nnoremap <leader>dp  <cmd>lua require('dapui').repl.toggle()<CR>
+
+
+
+
+
 lua <<EOF
 --=============================================================================
 --INITIALIZATIONS
 --=============================================================================
+require("neodev").setup({
+  library = { plugins = { "nvim-dap-ui" }, types = true },
+  ...
+})
+require("true-zen").setup{}
 require("nvim-autopairs").setup {}
 require('leap').add_default_mappings()
+require('rose-pine').setup({
+dark_variant = 'dawn'
 
+})
+
+require("dapui").setup()
+require('dap-go').setup()
+require('dap.ext.vscode').load_launchjs()
+local dap, dapui =require("dap"),require("dapui")
 require('lualine').setup{
 options={
-theme= "gruvbox",
+theme= "everforest",
 }
 }
 require("toggleterm").setup{
@@ -159,23 +217,22 @@ open_mapping= [[<c-t>]],
 direction='float'
 }
 
-require'shade'.setup({
-  overlay_opacity = 30,
-  opacity_step = 1,
-  keys = {
-    brightness_up    = '<C-Up>',
-    brightness_down  = '<C-Down>',
-  }
-})
 
-
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+require("nvim-tree").setup()
 --=============================================================================
 -- TREESITTER
 --=============================================================================
 
  require'nvim-treesitter.configs'.setup {
   -- A list of parser names, or "all"
-  ensure_installed = { "c", "lua", "rust","dart" },
+  ensure_installed = { "c", "lua", "rust","dart","eex",
+            "elixir",
+            "erlang",
+            "heex",
+            "html",
+            "surface", },
 
   -- Install parsers synchronously (only applied to `ensure_installed`)
   sync_install = false,
@@ -214,7 +271,15 @@ lsp.preset('recommended')
 lsp.setup()
 
 require('lspconfig')['dartls'].setup{}
-
+require('lspconfig')['html'].setup{
+filetypes = {"html","eex","heex"}
+}
+require('lspconfig')['emmet_ls'].setup{
+filetypes = {"ex","eex","heex"}
+}
+require('lspconfig')['elixirls'].setup{
+filetypes = {"ex","eex","heex"}
+}
 
 
 --=============================================================================
@@ -282,3 +347,53 @@ extensions = {
          telescope.load_extension(ext)
       end
    end)
+
+--=============================================================================
+-- DEBUGGING
+--=============================================================================
+dap.adapters.delve = {
+  type = 'server',
+  port = '${port}',
+  executable = {
+    command = 'dlv',
+    args = {'dap', '-l', '127.0.0.1:${port}'},
+  }
+}
+
+-- https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_dap.md
+dap.configurations.go = {
+  {
+    type = "delve",
+    name = "Debug",
+    request = "launch",
+    program = "${file}"
+  },
+  {
+    type = "delve",
+    name = "Debug test", -- configuration for debugging test files
+    request = "launch",
+    mode = "test",
+    program = "${file}"
+  },
+  -- works with go.mod packages and sub packages 
+  {
+    type = "delve",
+    name = "Debug test (go.mod)",
+    request = "launch",
+    mode = "test",
+    program = "./${relativeFileDirname}"
+  } 
+}
+
+dap.listeners.after.event_initialized["dapui_config"]=function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"]=function()
+  dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"]=function()
+  dapui.close()
+end
+
+vim.fn.sign_define('DapBreakpoint',{ text ='🟥', texthl ='', linehl ='', numhl =''})
+vim.fn.sign_define('DapStopped',{ text ='▶️', texthl ='', linehl ='', numhl =''})
