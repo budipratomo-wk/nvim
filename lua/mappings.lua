@@ -16,6 +16,7 @@ nomap("n", "<leader>gt")
 nomap("n", "<leader>q")
 nomap("n", "<leader>e")
 nomap("n", "<leader>x")
+nomap("t", "<esc>")
 
 local map = vim.keymap.set
 map("n", ";", ":", { desc = "CMD enter command mode" })
